@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rock Paper Scissors - Best of 5 + Themes + Names + Animated Hands</title>
+<style>
+  :root {
+    --color-bg-light: #f0f0f3;
+    --color-text-light: #222;
+    --color-bg-dark: #1a1a2e;
+    --color-text-dark: #e4e4f1;
+
+    --primary: #667eea;
+    --primary-dark: #764ba2;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f1c40f;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--color-bg-dark);
+    color: var(--color-text-dark);
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+  body.light {
+    background: var(--color-bg-light);
+    color: var(--color-text-light);
+  }
+  h1 {
+    margin-top: 1rem;
+    font-weight: 900;
+    text-shadow: 0 0 8px #fff8;
+    color: inherit;
+  }
+  .settings {
+    margin: 1rem 0;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    background: rgba(255 255 255 / 0.1);
+    box-shadow: 0 0 10px #6666;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    width: 90vw;
+    max-width: 600px;
+  }
+  .settings label {
+    font-weight: 600;
+  }
+  .settings input[type="text"] {
+    border-radius: 6px;
+    border: 1px solid #999;
+    padding: 0.3rem 0.6rem;
+    font-size: 1rem;
+    width: 140px;
+  }
+  .settings .mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .settings button#theme-toggle {
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 3px 8px #5b65c2;
+    transition: background-color 0.3s ease;
+  }
+  .settings button#theme-toggle:hover {
+    background: var(--primary-dark);
+  }
+
+  .game-container {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 420px;
+    width: 90vw;
+    box-shadow: 0 0 15px #8e8fffaa;
+    display: flex; flex-direction: column; align-items: center;
+    color: inherit;
+  }
+  body.light .game-container {
+    background: rgba(255 255 255 / 0.6);
+    box-shadow: 0 0 15px #8e8fff88;
+  }
+  .scoreboard {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+  }
+  .score {
+    text-align: center;
+    white-space: nowrap;
+  }
+  .score span {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 0.2rem;
+    color: var(--warning);
+  }
+  .choices {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  button.choice-btn {
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 4px 10px #5c52c2aa;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+  }
+  button.choice-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px #7e6cd9ee;
+  }
+  button.choice-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 3px 8px #5c52c2cc;
+  }
+  button.choice-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  .result {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    height: 2.2rem;
+    text-align: center;
+    font-weight: 700;
+    min-height: 48px;
+  }
+  .result.win {
+    color: var(--success);
+    text-shadow: 0 0 8px #2ecc71bb;
+  }
+  .result.lose {
+    color: var(--danger);
+    text-shadow: 0 0 8px #e74c3cbb;
+  }
+  .result.draw {
+    color: var(--warning);
+    text-shadow: 0 0 8px #f1c40fbb;
+  }
+  .turn-indicator {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-style: italic;
+    min-height: 1.2em;
+  }
+  .reset-btn {
+    margin-top: 1rem;
+    background: #f39c12;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 3px 8px #b67600cc;
+    transition: background-color 0.3s ease;
+  }
+  .reset-btn:hover {
+    background: #d78f00;
+  }
+
+  /* Animated hands container */
+  .hands-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    min-height: 60px;
+  }
+  .hand {
+    font-size: 48px;
+    user-select: none;
+    opacity: 0;
+    transform: scale(0);
+    animation-fill-mode: forwards;
+  }
+  .hand.show {
+    opacity: 1;
+    animation: pulse 0.5s ease forwards;
+  }
+  .hand.shake {
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes shake {
+    0%, 100% {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(15deg);
+    }
+    50% {
+      transform: rotate(-15deg);
+    }
+    75% {
+      transform: rotate(15deg);
+    }
+  }
+
+</style>
+</head>
+<body>
+
+<h1>Rock Paper Scissors</h1>
+
+<div class="settings">
+
+  <div>
+    <label for="player1-name">Player 1 Name:</label><br />
+    <input type="text" id="player1-name" placeholder="Player 1" maxlength="12" />
+  </div>
+
+  <div>
+    <label for="player2-name">Player 2 Name / Computer:</label><br />
+    <input type="text" id="player2-name" placeholder="Computer" maxlength="12" />
+  </div>
+
+  <div class="mode-toggle">
+    <label>
+      <input type="radio" name="mode" value="single" checked /> Play vs Computer
+    </label>
+    &nbsp;&nbsp;&nbsp;
+    <label>
+      <input type="radio" name="mode" value="friend" /> Play with Friend
+    </label>
+  </div>
+
+  <button id="theme-toggle" title="Toggle Light/Dark Mode">Toggle Light/Dark</button>
+
+</div>
+
+<div class="game-container">
+
+  <div class="scoreboard">
+    <div class="score" id="player1-score">Player 1<br /><span>0</span></div>
+    <div class="score" id="player2-score">Computer<br /><span>0</span></div>
+  </div>
+
+  <div class="turn-indicator" id="turn-indicator"></div>
+
+  <div class="hands-container">
+    <div id="hand1" class="hand"></div>
+    <div id="hand2" class="hand"></div>
+  </div>
+
+  <div class="choices">
+    <button class="choice-btn" data-choice="rock" title="Rock">🪨 Rock</button>
+    <button class="choice-btn" data-choice="paper" title="Paper">📄 Paper</button>
+    <button class="choice-btn" data-choice="scissors" title="Scissors"> ✂️Scissors</button>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <button class="reset-btn" id="reset-btn">Reset Game</button>
+</div>
+
+<!-- Sounds -->
+<audio id="click-sound" src="https://actions.google.com/sounds/v1/buttons/button_press.mp3"></audio>
+<audio id="hover-sound" src="https://actions.google.com/sounds/v1/buttons/button_rollover.mp3"></audio>
+<audio id="win-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="lose-sound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
+<audio id="draw-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+
+<script>
+  const choices = ['rock', 'paper', 'scissors'];
+  let player1Score = 0;
+  let player2Score = 0;
+  let player1Choice = null;
+  let player2Choice = null;
+  let mode = 'single'; // single or friend
+  let friendTurn = 1; // turn tracking for friend mode
+  let gameOver = false;
+
+  const player1ScoreSpan = document.querySelector('#player1-score span');
+  const player2ScoreSpan = document.querySelector('#player2-score span');
+  const choiceButtons = document.querySelectorAll('.choice-btn');
+  const resultDiv = document.getElementById('result');
+  const turnIndicator = document.getElementById('turn-indicator');
+  const resetBtn = document.getElementById('reset-btn');
+  const modeRadios = document.querySelectorAll('input[name="mode"]');
+  const player1NameInput = document.getElementById('player1-name');
+  const player2NameInput = document.getElementById('player2-name');
+  const player1ScoreDiv = document.getElementById('player1-score');
+  const player2ScoreDiv = document.getElementById('player2-score');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+
+  const clickSound = document.getElementById('click-sound');
+  const hoverSound = document.getElementById('hover-sound');
+  const winSound = document.getElementById('win-sound');
+  const loseSound = document.getElementById('lose-sound');
+  const drawSound = document.getElementById('draw-sound');
+
+  const hand1Div = document.getElementById('hand1');
+  const hand2Div = document.getElementById('hand2');
+
+  function playSound(sound) {
+    if (!sound) return;
+    sound.currentTime = 0;
+    sound.play();
+  }
+
+  function computerPick() {
+    return choices[Math.floor(Math.random() * choices.length)];
+  }
+
+  function determineWinner(c1, c2) {
+    if (c1 === c2) return 'draw';
+    if (
+      (c1 === 'rock' && c2 === 'scissors') ||
+      (c1 === 'paper' && c2 === 'rock') ||
+      (c1 === 'scissors' && c2 === 'paper')
+    ) return 'player1';
+    return 'player2';
+  }
+
+  function updateScores(winner) {
+    if (winner === 'player1') player1Score++;
+    else if (winner === 'player2') player2Score++;
+
+    player1ScoreSpan.textContent = player1Score;
+    player2ScoreSpan.textContent = player2Score;
+  }
+
+  function updatePlayerNames() {
+    let p1 = player1NameInput.value.trim();
+    let p2 = player2NameInput.value.trim();
+
+    if (p1 === '') p1 = 'Player 1';
+    if (p2 === '') p2 = mode === 'single' ? 'Computer' : 'Player 2';
+
+    // Update scoreboard names
+    player1ScoreDiv.childNodes[0].nodeValue = p1 + '\n';
+    player2ScoreDiv.childNodes[0].nodeValue = p2 + '\n';
+  }
+
+  function disableChoices(disable) {
+    choiceButtons.forEach((btn) => {
+      btn.disabled = disable;
+      btn.style.cursor = disable ? 'not-allowed' : 'pointer';
+      btn.style.opacity = disable ? '0.6' : '1';
+    });
+  }
+
+  function updateTurnIndicator() {
+    if (gameOver) {
+      turnIndicator.textContent = 'Game Over! Reset to play again.';
+      return;
+    }
+    if (mode === 'friend') {
+      let p1 = player1NameInput.value.trim() || 'Player 1';
+      let p2 = player2NameInput.value.trim() || 'Player 2';
+      turnIndicator.textContent = friendTurn === 1 ? `${p1}'s turn` : `${p2}'s turn`;
+    } else {
+      turnIndicator.textContent = 'Your turn';
+    }
+  }
+
+  function animateHand(handDiv) {
+    handDiv.classList.remove('shake');
+    // Trigger reflow to restart animation
+    void handDiv.offsetWidth;
+    handDiv.classList.add('shake');
+  }
+
+  function handEmoji(choice) {
+    switch(choice) {
+      case 'rock': return '🪨';
+      case 'paper': return '📄';
+      case 'scissors': return '✂️';
+      default: return '';
+    }
+  }
+
+  function showHands(c1, c2) {
+    hand1Div.textContent = handEmoji(c1);
+    hand2Div.textContent = handEmoji(c2);
+    hand1Div.classList.add('show');
+    hand2Div.classList.add('show');
+    animateHand(hand1Div);
+    animateHand(hand2Div);
+  }
+
+  function resetHands() {
+    hand1Div.classList.remove('show', 'shake');
+    hand2Div.classList.remove('show', 'shake');
+    hand1Div.textContent = '';
+    hand2Div.textContent = '';
+  }
+
+  function playRound(choice) {
+    if (gameOver) return;
+    playSound(clickSound);
+
+    updatePlayerNames();
+
+    if (mode === 'single') {
+      // Single player mode: player picks, computer picks
+      player1Choice = choice;
+      player2Choice = computerPick();
+      showHands(player1Choice, player2Choice);
+      const winner = determineWinner(player1Choice, player2Choice);
+      updateScores(winner);
+
+      if (winner === 'draw') {
+        resultDiv.textContent = "It's a Draw!";
+        resultDiv.className = 'result draw';
+        playSound(drawSound);
+      } else if (winner === 'player1') {
+        const p1 = player1NameInput.value.trim() || 'Player 1';
+        resultDiv.textContent = `${p1} Wins this Round!`;
+        resultDiv.className = 'result win';
+        playSound(winSound);
+      } else {
+        const p2 = player2NameInput.value.trim() || 'Computer';
+        resultDiv.textContent = `${p2} Wins this Round!`;
+        resultDiv.className = 'result lose';
+        playSound(loseSound);
+      }
+
+      disableChoices(true);
+
+      // Check game over condition best of 5 (first to 3)
+      if (player1Score === 3 || player2Score === 3) {
+        gameOver = true;
+        turnIndicator.textContent = 'Game Over!';
+        disableChoices(true);
+        return;
+      }
+
+      setTimeout(() => {
+        resetHands();
+        disableChoices(false);
+        updateTurnIndicator();
+        resultDiv.textContent = '';
+      }, 2000);
+
+    } else {
+      // Friend mode, players take turns to pick
+
+      if (friendTurn === 1) {
+        player1Choice = choice;
+        turnIndicator.textContent = 'Player 2, make your choice';
+        friendTurn = 2;
+        disableChoices(false);
+        resultDiv.textContent = '';
+        resetHands();
+        showHands(player1Choice, null);
+        // Disable choices until player 2 picks
+      } else {
+        player2Choice = choice;
+        showHands(player1Choice, player2Choice);
+        const winner = determineWinner(player1Choice, player2Choice);
+        updateScores(winner);
+
+        if (winner === 'draw') {
+          resultDiv.textContent = "It's a Draw!";
+          resultDiv.className = 'result draw';
+          playSound(drawSound);
+        } else if (winner === 'player1') {
+          const p1 = player1NameInput.value.trim() || 'Player 1';
+          resultDiv.textContent = `${p1} Wins this Round!`;
+          resultDiv.className = 'result win';
+          playSound(winSound);
+        } else {
+          const p2 = player2NameInput.value.trim() || 'Player 2';
+          resultDiv.textContent = `${p2} Wins this Round!`;
+          resultDiv.className = 'result lose';
+          playSound(loseSound);
+        }
+
+        disableChoices(true);
+
+        // Check game over condition best of 5 (first to 3)
+        if (player1Score === 3 || player2Score === 3) {
+          gameOver = true;
+          turnIndicator.textContent = 'Game Over!';
+          disableChoices(true);
+          return;
+        }
+
+        setTimeout(() => {
+          resetHands();
+          friendTurn = 1;
+          disableChoices(false);
+          updateTurnIndicator();
+          resultDiv.textContent = '';
+        }, 2000);
+      }
+    }
+  }
+
+  choiceButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      const choice = btn.getAttribute('data-choice');
+      playRound(choice);
+    });
+    btn.addEventListener('mouseenter', () => playSound(hoverSound));
+  });
+
+  resetBtn.addEventListener('click', () => {
+    player1Score = 0;
+    player2Score = 0;
+    player1ScoreSpan.textContent = '0';
+    player2ScoreSpan.textContent = '0';
+    player1Choice = null;
+    player2Choice = null;
+    friendTurn = 1;
+    gameOver = false;
+    updateTurnIndicator();
+    resultDiv.textContent = '';
+    disableChoices(false);
+    resetHands();
+  });
+
+  modeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      mode = document.querySelector('input[name="mode"]:checked').value;
+      if (mode === 'single') {
+        player2NameInput.value = 'Computer';
+        player2NameInput.disabled = true;
+      } else {
+        player2NameInput.value = '';
+        player2NameInput.disabled = false;
+      }
+      resetBtn.click();
+    });
+  });
+
+  player2NameInput.disabled = true;
+
+  player1NameInput.addEventListener('input', updatePlayerNames);
+  player2NameInput.addEventListener('input', updatePlayerNames);
+
+  themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+  });
+
+  // Init
+  updatePlayerNames();
+  updateTurnIndicator();
+</script>
+</body>
+</html>
